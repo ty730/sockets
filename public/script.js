@@ -9,7 +9,80 @@
   window.addEventListener("load", init);
 
   function init() {
+    socket.emit("get-lobbies");
+    socket.on("give-lobbies", updateLobbyList);
+    console.log("started");
+    id("hostbtn").addEventListener("click", host);
+    id("joinbtn").addEventListener("click", join);
+    id("new-game").addEventListener("submit", startNewGame);
+    id("join-game").addEventListener("submit", joinGame);
+    socket.on("new-lobby", onNewLobby);
+    socket.on("joined-game", playerJoined);
+  }
 
+  function host() {
+    console.log("hosting");
+    id("main").classList.add("hidden");
+    id("host").classList.remove("hidden");
+  }
+
+  function join() {
+    console.log("joining");
+    id("main").classList.add("hidden");
+    id("join").classList.remove("hidden");
+  }
+
+  function startNewGame(e) {
+    e.preventDefault();
+    let lname = id("lname").value;
+    console.log("before new-game: " + lname);
+    socket.emit("new-game", lname);
+
+    id("host").classList.add("hidden");
+    id("hostedname").textContent = lname;
+    id("hosted").classList.remove("hidden");
+
+  }
+
+  function joinGame(e) {
+    e.preventDefault();
+    let name = id("name").value;
+    let lobbyId = id("lobbyid").value;
+    console.log("before join-game: " + lobbyId);
+    console.log("person name: " + name);
+    socket.emit("join-game", lobbyId);
+  }
+
+  function updateLobbyList(lobbies) {
+    console.log("updateLobbyList: " + lobbies)
+    id("lobby-list").innerHTML = "";
+    for (let i = 0; i < lobbies.length; i++) {
+      appendLobby(lobbies[i], i);
+    }
+  }
+
+  function onNewLobby(lobby) {
+    console.log("WE ARE HERE: " + lobby)
+    appendLobby(lobby, id("lobby-list").childNodes.length);
+  }
+
+  function appendLobby(lobby, i) {
+    let lobbyListItem = gen("li");
+    lobbyListItem.textContent = lobby.lname;
+    lobbyListItem.id = "lobby" + i;
+    id("lobby-list").appendChild(lobbyListItem);
+  }
+
+  function playerJoined(lobby) {
+    if (lobby == null) {
+      console.log("invalid lobby name");
+    } else {
+      console.log("player joined game: " + lobby.players[0]);
+      let playerListItem = gen("li");
+      playerListItem.textContent = lobby.players[0];
+      //playerListItem.id = "player";
+      id("player-list").appendChild(playerListItem);
+    }
   }
 
   /**
