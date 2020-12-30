@@ -18,6 +18,8 @@
     id("join-game").addEventListener("submit", joinGame);
     socket.on("new-lobby", onNewLobby);
     socket.on("joined-game", playerJoined);
+
+    id("send-container").addEventListener("submit", writeMessage);
   }
 
   function host() {
@@ -102,6 +104,40 @@
       id("player-list").appendChild(playerListItem);
     }
   }
+
+  function writeMessage(event) {
+    event.preventDefault();
+    let messageInput = document.getElementById("input");
+    let message = messageInput.value;
+    let text = appendMessage("You: " + message);
+    text.classList.add("you");
+    socket.emit("send-chat-message", message);
+    messageInput.value = "";
+  }
+
+  function appendMessage(message) {
+    let messageElement = document.createElement("div");
+    messageElement.innerText = message;
+    let messageContainter = document.getElementById("messages");
+    messageContainter.append(messageElement);
+    return messageElement;
+  }
+
+  socket.on("chat-message", data => {
+    console.log(data.name, data.message);
+    let text = appendMessage(data.name + ": " + data.message);
+    text.classList.add("other");
+  });
+
+  /* socket.on("user-connected", name => {
+    let text = appendMessage(name + " connected");
+    text.classList.add("other");
+  });
+
+  socket.on("user-disconnected", name => {
+    let text = appendMessage(name + " disconnected");
+    text.classList.add("other");
+  }); */
 
   /**
    * Returns the element that has the ID attribute with the specified value.

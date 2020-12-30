@@ -31,7 +31,7 @@
     </ol>
   </div>
 
-  <div id="gamescreen">
+  <div id="gamescreen" class="hidden">
     <h1>This is the game</h1>
     <h2>*Insert photo here*</h2>
     <p></p>
@@ -53,6 +53,15 @@
 
   <div id="ingame" class="hidden">
     <h2 id="joinmessage"></h2>
+    <br>
+    <h2>Chat</h2>
+    <div id="chat">
+      <div id="messages"></div>
+      <form id="send-container">
+        <input type="text" id="input">
+        <button type="submit" id="submit-btn">Send</button>
+      </form>
+    </div>
   </div>
 
   </body>

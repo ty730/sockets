@@ -13,9 +13,12 @@ const server = express()
 const io = socketIO(server);
 
 const lobbies = [];
+const users = {};
 
 io.on("connection", (socket) => {
   console.log("Client connected: " + socket.id);
+
+  users[socket.id] = "No name";
 
   socket.on("get-lobbies", () => {
     console.log("current lobbies are:" + lobbies);
@@ -43,10 +46,15 @@ io.on("connection", (socket) => {
       socket.emit("joined-game", null);
     } else {
       lobbies[index].players.push(object.player);
+      users[socket.id] = object.player;
       console.log("joined game: " + object.player);
       socket.emit("joined-game", lobbies[index]);
       socket.broadcast.emit("joined-game", lobbies[index]);
     }
+  });
+
+  socket.on("send-chat-message", message => {
+    socket.broadcast.emit("chat-message", {"message": message, "name": users[socket.id]});
   });
 
   socket.on("disconnect", () => {
