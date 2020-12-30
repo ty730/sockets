@@ -2,9 +2,9 @@
   let socket = io();
   let el;
 
-  let player;
-  let user1 = "";
-  let user2 = "";
+  let lid = "";
+  let playername = "";
+  let players = [];
 
   window.addEventListener("load", init);
 
@@ -38,6 +38,8 @@
     console.log("before new-game: " + lname);
     socket.emit("new-game", lname);
 
+    lid = lname;
+
     id("host").classList.add("hidden");
     id("hostedname").textContent = lname;
     id("hosted").classList.remove("hidden");
@@ -47,10 +49,12 @@
   function joinGame(e) {
     e.preventDefault();
     let name = id("name").value;
+    playername = name;
     let lobbyId = id("lobbyid").value;
+    let object = {"lobby": lobbyId, "player": name};
     console.log("before join-game: " + lobbyId);
     console.log("person name: " + name);
-    socket.emit("join-game", lobbyId);
+    socket.emit("join-game", object);
   }
 
   function updateLobbyList(lobbies) {
@@ -74,12 +78,26 @@
   }
 
   function playerJoined(lobby) {
+    console.log("playername: " + playername);
     if (lobby == null) {
-      console.log("invalid lobby name");
-    } else {
+      //console.log("invalid lobby name");
+      //id("joinmessage").textContent = "Invalid lobby name, try again.";
+
+    } else if (lobby.players[lobby.players.length - 1] == playername) {
       console.log("player joined game: " + lobby.players[0]);
+      id("join").classList.add("hidden");
+      id("ingame").classList.remove("hidden");
+      id("joinmessage").textContent = "You joined the lobby: " + lobby.lname + ", waiting for other players...";
+      //id("join-lobby").disabled = true;
+      //id("name").textContent = "";
+      //id("lobbyid").textContent = "";
+
+    } else if (lobby.lname == lid) {
+      console.log("last on list: " + lobby.players[lobby.players.length - 1]);
       let playerListItem = gen("li");
-      playerListItem.textContent = lobby.players[0];
+      playerListItem.textContent = lobby.players[lobby.players.length - 1];
+
+      players.push(lobby.players[lobby.players.length - 1]);
       //playerListItem.id = "player";
       id("player-list").appendChild(playerListItem);
     }
